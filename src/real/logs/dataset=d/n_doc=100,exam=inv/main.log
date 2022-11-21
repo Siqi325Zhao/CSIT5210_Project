@@ -1,0 +1,16 @@
+[2022-11-21 15:21:44,295][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 16:47:11,767][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 16:49:34,150][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 16:53:03,647][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 16:53:40,889][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 16:58:30,336][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 16:59:54,886][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 17:01:01,531][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 17:08:11,330][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 17:08:29,461][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 17:08:43,823][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 17:09:27,091][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 17:10:06,115][__main__][INFO] - The current working directory is /Users/lishangyu/PyProjects/kdd2022-fair-ranking-nsw/src/real/logs/dataset=d/n_doc=100,exam=inv
+[2022-11-21 17:14:08,849][__main__][INFO] - k=1: 4.05min (diff 4.05min)
+[2022-11-21 17:22:04,900][__main__][INFO] - k=3: 11.98min (diff 7.93min)
+[2022-11-21 17:28:45,283][__main__][INFO] - k=5: 18.65min (diff 6.67min)
