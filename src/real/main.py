@@ -17,6 +17,9 @@ import pandas as pd
 from pandas import DataFrame
 
 
+from spliter import consumeAndGeneratefile
+
+
 logger = getLogger(__name__)
 
 
@@ -49,18 +52,30 @@ def main(cfg: DictConfig) -> None:
     log_path.mkdir(exist_ok=True, parents=True)
 
     elapsed_prev = 0.0
+
+    index = 0
+    for consumer_record in consumer:
+        splitFile = open("splitFile%d.txt" % index, "w")
+        index += 1
+
     for k in K_list:
         v = exam_func(n_doc, k, cfg.setting.exam_func)
         result_df_box = DataFrame(
             columns=["policy", "item_util", "max_envy", "imp_in_item_util"]
         )
         for s in np.arange(cfg.setting.n_seeds):
+
+            # now only apply to the delicious dataset
+            splitFile = consumeAndGeneratefile(
+                dataset=cfg.setting.dataset, path=Path().cwd().parents[2] / "data")
+
             rel_mat_true, rel_mat_obs, info = preprocess_data(
                 dataset=cfg.setting.dataset,
                 path=Path().cwd().parents[2] / "data",
                 n_doc=n_doc,
                 test_size=cfg.setting.test_size,
                 random_state=s,
+                generated_file=splitFile,
             )
 
             print("rel_mat_true: ", rel_mat_true.shape)
@@ -114,9 +129,6 @@ def main(cfg: DictConfig) -> None:
             mean_max_envy_nsw_list = []
             pct_item_util_better_off_nsw_list = []
             pct_item_util_worse_off_nsw_list = []
-
-
-            
 
             # return
             # rel_mat, v, alpha

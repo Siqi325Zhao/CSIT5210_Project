@@ -84,8 +84,10 @@ def preprocess_data(
         test_size=test_size,
         random_state=random_state,
     )
-    rel_mat_obs = rel_mat_tr[:, (rel_mat_tr.sum(0) != 0) & (rel_mat_te.sum(0) != 0)]
-    rel_mat_te = rel_mat_te[:, (rel_mat_tr.sum(0) != 0) & (rel_mat_te.sum(0) != 0)]
+    rel_mat_obs = rel_mat_tr[:, (rel_mat_tr.sum(
+        0) != 0) & (rel_mat_te.sum(0) != 0)]
+    rel_mat_te = rel_mat_te[:, (rel_mat_tr.sum(0) != 0)
+                            & (rel_mat_te.sum(0) != 0)]
     info["num_train"] = X_tr.shape[0]
     info["num_test"] = X_te.shape[0]
 
@@ -113,8 +115,10 @@ def preprocess_data(
         [_[:, 1][:, np.newaxis] for _ in pipe.predict_proba(X_te)], 1
     )
     info["explained_variance_ratio"] = pipe["pca"].explained_variance_ratio_.sum()
-    info["log_loss"] = log_loss(rel_mat_te.flatten(), rel_mat_te_pred.flatten())
-    info["auc"] = roc_auc_score(rel_mat_te.flatten(), rel_mat_te_pred.flatten())
+    info["log_loss"] = log_loss(
+        rel_mat_te.flatten(), rel_mat_te_pred.flatten())
+    info["auc"] = roc_auc_score(
+        rel_mat_te.flatten(), rel_mat_te_pred.flatten())
 
     return rel_mat_te, rel_mat_te_pred, info
 
@@ -176,11 +180,11 @@ def compute_pi_expo_fair(
     obj = 0.0
     constraints = []
     for d in np.arange(n_doc):
-        pi_d = pi[:, K * d : K * (d + 1)]
+        pi_d = pi[:, K * d: K * (d + 1)]
         obj += rel_mat[:, d] @ pi_d @ v
         # feasible allocation
         basis_ = np.zeros((n_doc * K, 1))
-        basis_[K * d : K * (d + 1)] = 1
+        basis_[K * d: K * (d + 1)] = 1
         constraints += [pi @ basis_ <= query_basis]
         # amortized exposure
         constraints += [query_basis.T @ pi_d @ v <= am_expo[d]]
@@ -215,10 +219,11 @@ def compute_pi_nsw(
     obj = 0.0
     constraints = []
     for d in np.arange(n_doc):
-        obj += am_rel[d] * cvx.log(rel_mat[:, d] @ pi[:, K * d : K * (d + 1)] @ v)
+        obj += am_rel[d] * cvx.log(rel_mat[:, d] @
+                                   pi[:, K * d: K * (d + 1)] @ v)
         # feasible allocation
         basis_ = np.zeros((n_doc * K, 1))
-        basis_[K * d : K * (d + 1)] = 1
+        basis_[K * d: K * (d + 1)] = 1
         constraints += [pi @ basis_ <= query_basis]
     # feasible allocation
     for k in np.arange(K):
@@ -242,3 +247,105 @@ def compute_pi_unif(rel_mat: np.ndarray, v: np.ndarray) -> np.ndarray:
     K = v.shape[0]
 
     return np.ones((n_query, n_doc, K)) / n_doc
+
+
+def preprocess_data_real_time(
+    dataset: str,
+    path: Path = Path("./data"),
+    n_doc: int = 100,
+    classifier: ClassifierMixin = LogisticRegression(
+        C=100,
+        max_iter=1000,
+        random_state=12345,
+    ),
+    lam: float = 1.0,
+    test_size: float = 0.1,
+    eps_plus: float = 1.0,
+    eps_minus: float = 0.0,
+    random_state: int = 12345,
+    iteration=1
+) -> list:
+    info = dict()
+    random_ = check_random_state(random_state)
+
+    # Read file with features and labels
+    features, tabels, num_samples, num_features, num_labels = data_utils.read_data(
+        path / f"data_{iteration}.txt"
+    )
+    info["num_all_data"] = num_samples
+    info["num_features"] = num_features
+    info["num_labels"] = num_labels
+    info["n_doc"] = n_doc
+
+    # BoW Feature
+    X = features.toarray()
+    # Multilabel Table
+    T = tabels.toarray()
+
+    # sample labels via eps-greedy
+    n_points_per_label = T.sum(0)
+    top_labels = rankdata(-n_points_per_label, method="ordinal") <= n_doc
+    sampling_probs = lam * top_labels + (1 - lam) * n_doc / num_labels
+    sampling_probs /= sampling_probs.sum()
+    sampled_labels = random_.choice(
+        np.arange(num_labels), size=n_doc, p=sampling_probs, replace=False
+    )
+    T = T[:, sampled_labels]
+    info["lam"] = lam
+
+    # minimum num of relevant labels per data
+    if dataset == "d":
+        n_rel_labels = 10
+    elif dataset == "e":
+        n_rel_labels = 2
+    elif dataset == "w":
+        n_rel_labels = 5
+    n_rel_labels = np.maximum(n_rel_labels * lam, 1)
+    n_labels_per_point = T.sum(1)
+    T = T[n_labels_per_point >= n_rel_labels, :]
+    X = X[n_labels_per_point >= n_rel_labels, :]
+
+    # train-test split
+    X_tr, X_te, rel_mat_tr, rel_mat_te = train_test_split(
+        X,
+        T,
+        test_size=test_size,
+        random_state=random_state,
+    )
+    rel_mat_obs = rel_mat_tr[:, (rel_mat_tr.sum(
+        0) != 0) & (rel_mat_te.sum(0) != 0)]
+    rel_mat_te = rel_mat_te[:, (rel_mat_tr.sum(0) != 0)
+                            & (rel_mat_te.sum(0) != 0)]
+    info["num_train"] = X_tr.shape[0]
+    info["num_test"] = X_te.shape[0]
+
+    # add noise to train data
+    rel_mat_tr_prob = eps_plus * rel_mat_obs + eps_minus * (1 - rel_mat_obs)
+    rel_mat_tr_obs = random_.binomial(n=1, p=rel_mat_tr_prob)
+
+    # relevance prediction
+    n_components = np.minimum(200, rel_mat_obs.shape[0])
+    pipe = Pipeline(
+        [
+            ("pca", PCA(n_components=n_components)),
+            ("scaler", StandardScaler()),
+            (
+                "clf",
+                MultiOutputClassifier(
+                    classifier,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    )
+    pipe.fit(X_tr, rel_mat_tr_obs)
+    rel_mat_te_pred = np.concatenate(
+        [_[:, 1][:, np.newaxis] for _ in pipe.predict_proba(X_te)], 1
+    )
+    info["explained_variance_ratio"] = pipe["pca"].explained_variance_ratio_.sum()
+    info["log_loss"] = log_loss(
+        rel_mat_te.flatten(), rel_mat_te_pred.flatten())
+    info["auc"] = roc_auc_score(
+        rel_mat_te.flatten(), rel_mat_te_pred.flatten())
+
+    return rel_mat_te, rel_mat_te_pred, info
