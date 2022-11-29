@@ -1,10 +1,31 @@
+# This is the project of CSIT 5210 Group 8 
+
 # Fair Ranking as Fair Division: Impact-Based Individual Fairness in Ranking (KDD2022)
 
-This repository contains the code used for the experiments in "Fair Ranking as Fair Division: Impact-Based Individual Fairness in Ranking" ([KDD2022](https://kdd.org/kdd2022/)) by [Yuta Saito](https://usait0.com/en/) and [Thorsten Joachims](https://www.cs.cornell.edu/people/tj/).
+The project is based on the paper "Fair Ranking as Fair Division: Impact-Based Individual Fairness in Ranking" ([KDD2022](https://kdd.org/kdd2022/)) by [Yuta Saito](https://usait0.com/en/) and [Thorsten Joachims](https://www.cs.cornell.edu/people/tj/). And the GitHub repo is "https://github.com/usaito/kdd2022-fair-ranking-nsw".
 
-## Abstract
+## notes: code running
 
-Rankings have become the primary interface of many two-sided markets. Many have noted that the rankings not only affect the satisfaction of the users (e.g., customers, listeners, employers, travelers), but that the position in the ranking allocates exposure -- and thus economic opportunity -- to the ranked items (e.g., articles, products, songs, job seekers, restaurants, hotels). This has raised questions of fairness to the items, and most existing works have addressed fairness by explicitly linking item exposure to item relevance. However, we argue that any particular choice of such a link function may be difficult to defend, and we show that the resulting rankings can still be unfair. To avoid these shortcomings, we develop a new axiomatic approach that is rooted in principles of *fair division*. This not only avoids the need to choose a link function, but also more meaningfully quantifies the impact on the items beyond exposure. Our axioms of *envy-freeness* and *dominance over uniform ranking* postulate that in fair rankings every item should prefer their own rank allocation over that of any other item, and that no item should be actively disadvantaged by the rankings. To compute ranking policies that are fair according to these axioms, we propose a new ranking objective related to the *Nash Social Welfare*. We show that the solution has guarantees regarding its envy-freeness, its dominance over uniform rankings for every item, and its Pareto optimality. In contrast, we show that conventional exposure-based fairness can produce large amounts of envy and have a highly disparate impact on the items. Beyond these theoretical results, we illustrate empirically how our framework controls the trade-off between impact-based individual item fairness and user utility.
+The implementation seems incompatible with Windows. That is, we can't installed some required libraries of this implementation in Windows.
+
+each data (1 line per datapoint) is regarded as a user. If a data belongs to a label, then they are considered relevant.
+
+the compute function for the proposed method is in `src/real/func.py` → `compute_pi_nsw(..)`
+
+The notation $K$ represents the $K$ in DCG@K. DCG@K is a metric for the evaluation of ranking algorithm, where $K$ means the metric only consider the correctness of the top $K$ rankings (i.e., the length of ranking in the paper).
+
+## notes: dataset
+
+> The data files for all the datasets are in the following sparse representation format:
+>
+> ```
+> Header Line: Total_Points Num_Features Num_Labels
+> 1 line per datapoint : label1,label2,...labelk ft1:ft1_val ft2:ft2_val ft3:ft3_val .. ftd:ftd_val
+> ```
+>
+> For the small scale datasets, we have provided the complete data in one file. We have provided separate files for the train and test splits which contain the indices of the points that are in the train set and the test set. Each corresponding column of the split files contains a separate split.
+>
+> For the large scale datasets, we have provided a single train and test split individually in two separate files.
 
 ## Citation
 
@@ -47,6 +68,7 @@ cvxpy = "1.1.17"
 hydra-core = "1.0.7"
 Cython = "0.29.24"
 scikit-learn = "1.0.1"
+kafka-python = "2.0.2"
 ```
 
 We also use [`pyxclib`](https://github.com/kunaldahiya/pyxclib) to handle extreme classification data. This tool cannot be installed via `pip`, so please build this tool as follows.
@@ -83,28 +105,12 @@ Note that we rename
 The experimental workflow is implemented using [Hydra](https://github.com/facebookresearch/hydra).
 The commands needed to reproduce the experiment of each section are summarized below. Please move under the `src` directly first and then run the commands. The experimental results (including the corresponding figures) will be stored in the `logs/` directory.
 
-### Synthetic Data (Section 5.1 and Appendix)
-
-```bash
-
-# varying lambda (Figures 1 and 2)
-poetry run python synthetic/main_lam.py
-
-# varying noise level (Figure 3)
-poetry run python synthetic/main_noise.py
-
-# varying K (Figure 5)
-poetry run python synthetic/main_k.py
-
-# varying number of items (Figure 6)
-poetry run python synthetic/main_n_doc.py
-
-# varying number of items (Figure 7)
-poetry run python synthetic/main_lam.py setting.exam_func=exp
-```
-
 ### Real-World Data (Section 5.2 and Appendix)
 
 ```bash
-poetry run python real/main.py setting.dataset=d,w -m
+poetry run python real/main_real_time.py setting.dataset=d,w -m
+```
+
+```bash
+poetry run python real/splitter.py
 ```

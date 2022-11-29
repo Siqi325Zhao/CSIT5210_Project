@@ -1,3 +1,5 @@
+# this is the data source file, waiting for other data source extensions!
+
 from kafka import KafkaProducer
 from pathlib import Path
 import os
@@ -5,10 +7,8 @@ import time
 
 producer = KafkaProducer(bootstrap_servers='localhost:9092')
 
-print("processing...")
-
-
-def split():
+# use delicious data as an example
+def producer():
     path = os.getcwd()
     print(path)
 
@@ -44,5 +44,16 @@ def split():
 
     producer.flush()
 
+# here could be another data source
+# every piece of data is consisted of a labels and features
+# set the Num_Features Num_Labels in setting file default.yaml first
 
-split()
+
+def producer_extension():
+    pass
+
+
+if __name__ == '__main__':
+    print("processing...")
+
+    producer()

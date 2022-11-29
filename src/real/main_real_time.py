@@ -60,7 +60,9 @@ def main(cfg: DictConfig) -> None:
 
     # print(path)
     index = 0
-    head = ' 500 983\n'
+    # head = ' 500 983\n'
+    head = ' ' + str(cfg.setting.Num_Features) + ' ' + \
+        str(cfg.setting.Num_Labels) + '\n'
     data_stored = []
     iteration = 0
     sliceing_length = cfg.setting.slice_length
@@ -91,12 +93,8 @@ def main(cfg: DictConfig) -> None:
         else:
             continue
 
-        print(type(output))
-        print(output)
-
-        # ss = output.decode('utf-8')
-        # print(type(ss))
-        # print(ss)
+        # print(type(output))
+        # print(output)
 
         for k in K_list:
             v = exam_func(n_doc, k, cfg.setting.exam_func)
@@ -244,6 +242,7 @@ def main(cfg: DictConfig) -> None:
 
         result_df.reset_index(inplace=True)
         result_df.to_csv(log_path / "result_df.csv")
+        # add visualizations here
 
 
 if __name__ == "__main__":

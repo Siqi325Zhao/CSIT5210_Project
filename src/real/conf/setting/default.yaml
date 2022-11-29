@@ -20,3 +20,7 @@ K_list:
 alpha_list:
   - 1.0
   - 0.0
+# threshold
+slice_length: 100
+Num_Features: 500
+Num_Labels: 983
